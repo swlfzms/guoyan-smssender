@@ -7,5 +7,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ActivityResultRepository extends JpaRepository<ActivityResult, Long> {
-    public ActivityResult findByPhoneAndActivityCode(@Param("phone") String phone, @Param("activityCode") String activityCode);
+    public ActivityResult findByPhoneAndActivityCodeAndDeleted(@Param("phone") String phone, @Param("activityCode") String activityCode, @Param("deleted") boolean deleted);
 }

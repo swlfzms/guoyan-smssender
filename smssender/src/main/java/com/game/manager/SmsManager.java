@@ -7,12 +7,15 @@ import com.game.entity.ActivityRegister;
 import com.game.entity.ActivityResult;
 import com.game.repository.ActivityRegisterRepository;
 import com.game.repository.ActivityResultRepository;
+import com.game.service.ReservationService;
+import org.apache.commons.codec.digest.Md5Crypt;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import sun.security.provider.MD5;
 
 import java.util.Date;
 import java.util.List;
@@ -30,6 +33,8 @@ public class SmsManager {
     private StringRedisTemplate redisTemplate;
     @Autowired
     private ActivityResultRepository activityResultRepository;
+    @Autowired
+    private ReservationService reservationService;
 
     public String getPhoneCode(String phone){
         String key = getPhoneRegisterKey(phone);
@@ -67,19 +72,33 @@ public class SmsManager {
         redisTemplate.expire(key, 12, TimeUnit.HOURS);
     }
 
-    public void delPhoneCode(String phone, String activityCode) {
+    public String delPhoneCode(String phone, String activityCode) {
         String key = getPhoneRegisterKey(phone);
 
         ActivityResult activityResult = new ActivityResult();
         activityResult.setActivityCode(activityCode);
         activityResult.setPhone(phone);
         activityResult.setCreatedTime(new Date());
+        String reservationCode = "";
+        synchronized (reservationService){
+            List<String> list = reservationService.findAll(activityCode);
+            if(list == null || list.size() == 0){
+                LOGGER.error("活动预热码不足");
+                reservationCode = Md5Crypt.md5Crypt((phone+activityCode+System.currentTimeMillis()).getBytes());
+            }else{
+                reservationCode = list.remove(0);
+            }
+            activityResult.setReservationCode(reservationCode);
+            reservationService.useCode(reservationCode, activityCode);
+        }
         try {
             activityResultRepository.save(activityResult);
+
         }catch (Exception e){
             LOGGER.error("error: {}", e);
         }
         redisTemplate.delete(key);
+        return reservationCode;
     }
 
 
@@ -93,7 +112,7 @@ public class SmsManager {
         if(StringUtils.isNotBlank(value)){
             return JSON.parseObject(value, ActivityResult.class);
         }
-        ActivityResult result = activityResultRepository.findByPhoneAndActivityCode(phone, activityCode);
+        ActivityResult result = activityResultRepository.findByPhoneAndActivityCodeAndDeleted(phone, activityCode, false);
         if(result != null){
             redisTemplate.opsForValue().set(key, JSON.toJSONString(result));
             redisTemplate.expire(key, 30, TimeUnit.DAYS);

@@ -38,10 +38,9 @@ public class SmsService {
         return smsManager.getPhoneCode(phone);
     }
 
-    public void delPhoneCode(String phone) {
+    public String delPhoneCode(String phone) {
         String activityCode = environment.getProperty("activity.code", "c8pnadsghyov");
-        smsManager.delPhoneCode(phone,activityCode);
-
+        return smsManager.delPhoneCode(phone,activityCode);
     }
 
 

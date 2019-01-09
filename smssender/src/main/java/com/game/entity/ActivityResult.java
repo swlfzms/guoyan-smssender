@@ -24,6 +24,11 @@ public class ActivityResult {
     @Column(name = "created_time")
     private Date createdTime;
 
+    @Column(name = "reservation_code")
+    private String reservationCode;
+
+    private boolean deleted;
+
     public Long getId() {
         return id;
     }
@@ -54,5 +59,21 @@ public class ActivityResult {
 
     public void setCreatedTime(Date createdTime) {
         this.createdTime = createdTime;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
+    }
+
+    public String getReservationCode() {
+        return reservationCode;
+    }
+
+    public void setReservationCode(String reservationCode) {
+        this.reservationCode = reservationCode;
     }
 }

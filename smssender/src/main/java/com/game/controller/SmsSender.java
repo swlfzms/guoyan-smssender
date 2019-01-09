@@ -33,7 +33,7 @@ import java.util.Date;
 @RequestMapping("sms")
 public class SmsSender extends BaseController{
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Application.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SmsSender.class);
 
     @Autowired
     private SmsService smsService;
@@ -100,8 +100,10 @@ public class SmsSender extends BaseController{
         String vCode = smsService.getPhoneCode(phone);
         LOGGER.info("phone: {}, vCode: {} ", new Object[]{phone, vCode});
         if(StringUtils.isNotBlank(vCode) && vCode.equalsIgnoreCase(code)){
-            smsService.delPhoneCode(phone);
-            return new ResultBean("1000", "登记成功");
+            String resultCode = smsService.delPhoneCode(phone);
+            ResultBean resultBean =  new ResultBean("1000", "登记成功");
+            resultBean.setData(resultCode);
+            return resultBean;
         }else{
             LOGGER.info("phone: {} 验证码错误", new Object[]{phone});
             return new ResultBean("1000", "验证码错误");

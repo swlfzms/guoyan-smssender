@@ -1,5 +1,7 @@
 package com.game.beans;
 
+import com.alibaba.fastjson.JSONObject;
+
 import java.io.Serializable;
 
 /**
@@ -11,6 +13,7 @@ public class ResultBean implements Serializable{
 
     private String code;
     private String message;
+    private Object data;
 
     public ResultBean(String code, String message){
         this.code = code;
@@ -31,5 +34,13 @@ public class ResultBean implements Serializable{
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public Object getData() {
+        return data;
+    }
+
+    public void setData(Object data) {
+        this.data = data;
     }
 }
