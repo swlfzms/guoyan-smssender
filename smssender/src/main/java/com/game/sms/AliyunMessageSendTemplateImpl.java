@@ -126,4 +126,46 @@ public class AliyunMessageSendTemplateImpl {
         });
         return outId;
     }
+
+    public String send(String signName, String phone, String templateCode, JSONObject templateParam) throws ClientException, InterruptedException {
+
+        logger.info("待发送短信: {}, {}", new Object[]{phone, templateCode});
+        //组装请求对象-具体描述见控制台-文档部分内容
+        SendSmsRequest request = new SendSmsRequest();
+        //必填:待发送手机号
+        request.setPhoneNumbers(phone);
+        //必填:短信签名-可在短信控制台中找到
+        request.setSignName(signName);
+        //必填:短信模板-可在短信控制台中找到
+        request.setTemplateCode(templateCode);
+        //可选:模板中的变量替换JSON串,如模板内容为"亲爱的${name},您的验证码为${code}"时,此处的值为"{\"name\":\"Tom\", \"code\":\"123\"}"
+        request.setTemplateParam(templateParam.toJSONString());
+
+        //选填-上行短信扩展码(无特殊需求用户请忽略此字段)
+        //request.setSmsUpExtendCode("90997");
+
+        //可选:outId为提供给业务方扩展字段,最终在短信回执消息中将此值带回给调用者
+        String outId = "ignore";//UUID.randomUUID().toString();
+        request.setOutId(outId);
+        logger.info("outId: {}", outId);
+
+        executorService.submit(new Runnable() {
+            @Override
+            public void run() {
+                try{
+                    //hint 此处可能会抛出异常，注意catch
+                    SendSmsResponse sendSmsResponse = acsClient.getAcsResponse(request);
+                    Thread.sleep(3000L);
+                    if (sendSmsResponse.getCode() != null && sendSmsResponse.getCode().equals("OK")) {
+                        logger.info("阿里云接收到短信: {}", outId);
+                    } else {
+                        logger.error("短信发送失败: {}" + sendSmsResponse.getMessage());
+                    }
+                }catch (Exception e){
+                    logger.error("exception e" + e);
+                }
+            }
+        });
+        return outId;
+    }
 }

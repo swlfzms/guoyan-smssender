@@ -61,6 +61,10 @@ public class AliyunSmsReportWorker {
                 //TODO 这里开始编写您的业务代码
                 logger.info("Aliyun短信发送状态contentMap {}", JSON.toJSONString(contentMap));
                 String outId = contentMap.get("out_id").toString();
+                if("ignore".equalsIgnoreCase(outId)){
+                    //忽略不保存结果的短信
+                    return true;
+                }
                 ActivityRegister activityRegister = activityRegisterRepository.findByOutId(outId);
                 activityRegister.setModifiedTime(new Date());
                 if(success!=null && success == true){
@@ -78,7 +82,7 @@ public class AliyunSmsReportWorker {
                 //您自己的代码部分导致的异常，应该return false,这样消息不会被delete掉，而会根据策略进行重推
                 e.printStackTrace();
                 logger.error("内部逻辑错误: {}",e);
-                return false;
+                return true;
             }
 
             //消息处理成功，返回true, SDK将调用MNS的delete方法将消息从队列中删除掉

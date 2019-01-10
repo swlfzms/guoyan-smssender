@@ -6,6 +6,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.game.Application;
 import com.game.beans.ResultBean;
 import com.game.entity.ActivityReservation;
+import com.game.entity.ActivityResult;
+import com.game.repository.ActivityResultRepository;
 import com.game.service.ReservationService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -33,6 +35,7 @@ public class ReservationController extends BaseController {
     private static final Logger LOGGER = LoggerFactory.getLogger(ReservationController.class);
     @Autowired
     private ReservationService reservationService;
+    private ActivityResultRepository activityResultRepository;
     @Autowired
     private Environment environment;
 
@@ -76,4 +79,6 @@ public class ReservationController extends BaseController {
         resultBean.setData(list);
         return resultBean;
     }
+
+
 }

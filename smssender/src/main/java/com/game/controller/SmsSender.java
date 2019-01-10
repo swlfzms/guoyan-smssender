@@ -37,6 +37,7 @@ public class SmsSender extends BaseController{
 
     @Autowired
     private SmsService smsService;
+
     @Autowired
     private Environment env;
 
@@ -79,7 +80,7 @@ public class SmsSender extends BaseController{
             smsService.setPhoneCode(phone, code);
             JSONObject content = new JSONObject();
             content.put("code", code);
-            smsService.sendMessage(phone, "SMS_151785361", content);
+            smsService.sendMessage(phone, "SMS_155275146", content);
         }
         smsService.incrementFrequencyAccess(ip);
         return new ResultBean("1000", "短信发送成功");
@@ -101,6 +102,9 @@ public class SmsSender extends BaseController{
         LOGGER.info("phone: {}, vCode: {} ", new Object[]{phone, vCode});
         if(StringUtils.isNotBlank(vCode) && vCode.equalsIgnoreCase(code)){
             String resultCode = smsService.delPhoneCode(phone);
+            JSONObject reservationCode = new JSONObject();
+            reservationCode.put("code", resultCode);
+            smsService.sendMessage("三国志M", phone, "SMS_155275048", reservationCode);
             ResultBean resultBean =  new ResultBean("1000", "登记成功");
             resultBean.setData(resultCode);
             return resultBean;
@@ -133,5 +137,20 @@ public class SmsSender extends BaseController{
     public @ResponseBody ResultBean total(){
         int count = smsService.getTotal();
         return new ResultBean("1000", ""+count);
+    }
+
+    @RequestMapping("reservation")
+    public @ResponseBody
+    ResultBean reservation(@RequestBody JSONObject params) {
+        String phone = params.getString("phone");
+        ResultBean resultBean = new ResultBean("1000", "查找成功");
+        String activityCode = env.getProperty("activity.code", "c8pnadsghyov");
+        ActivityResult activityResult = this.smsService.findByPhoneAndActivityCode(activityCode, phone);
+        if(activityResult!=null){
+            resultBean.setData(activityResult.getReservationCode());
+        }else{
+            resultBean = new ResultBean("1001", "未预约");
+        }
+        return resultBean;
     }
 }

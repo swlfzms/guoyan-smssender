@@ -18,6 +18,7 @@ public class PhoneFormatUtils {
         phoneAreaPrefix.put("65", "8");
         phoneAreaPrefix.put("60", "9_10");
         phoneAreaPrefix.put("886", "9");
+        phoneAreaPrefix.put("85", "9");
         phoneAreaPrefix.put("852", "8");
         phoneAreaPrefix.put("61", "9");
         phoneAreaPrefix.put("86", "11");
@@ -48,6 +49,9 @@ public class PhoneFormatUtils {
         }
 
         String phoneLengthRule = phoneAreaPrefix.get(areaPhone[0]);
+        if(StringUtils.isBlank(phoneLengthRule)){
+            return false;
+        }
         String[] rules = StringUtils.split(phoneLengthRule, "_");
         for(int i=0;i<rules.length;i++){
             if(Integer.valueOf(rules[i]) == areaPhone[1].length()){

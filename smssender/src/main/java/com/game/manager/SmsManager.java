@@ -93,8 +93,8 @@ public class SmsManager {
         }
         try {
             activityResultRepository.save(activityResult);
-
         }catch (Exception e){
+            reservationCode = "";
             LOGGER.error("error: {}", e);
         }
         redisTemplate.delete(key);

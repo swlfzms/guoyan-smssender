@@ -1,6 +1,7 @@
 package com.game.service;
 
 import com.alibaba.fastjson.JSONObject;
+import com.aliyuncs.exceptions.ClientException;
 import com.game.Application;
 import com.game.activity.PhoneFrequency;
 import com.game.entity.ActivityRegister;
@@ -40,21 +41,35 @@ public class SmsService {
 
     public String delPhoneCode(String phone) {
         String activityCode = environment.getProperty("activity.code", "c8pnadsghyov");
-        return smsManager.delPhoneCode(phone,activityCode);
+        String code = smsManager.delPhoneCode(phone,activityCode);
+        return code;
     }
 
 
     public void setPhoneCode(String phone, String code) {
         this.smsManager.setPhoneCode(phone, code);
     }
-
+    public void sendMessage(String signName, String phone, String templateCode, JSONObject param) {
+        String global = environment.getProperty("sms.global", "false");
+        if(phone.startsWith("86-")){
+            phone = phone.substring(phone.indexOf("-") + 1, phone.length());
+        }else if (phone.contains("-")) {
+            phone = phone.replace("-", "");
+        }
+        try {
+            aliyun.send(signName, phone, templateCode, param);
+        } catch (ClientException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        LOGGER.info("phone:{}, templateCode: {}, message:{}, reservation message", new Object[]{phone, templateCode, param.toJSONString()});
+    }
     public void sendMessage(String phone, String templateCode, JSONObject param) {
         String global = environment.getProperty("sms.global", "false");
-        if ("true".equalsIgnoreCase(global) && phone.contains("-")) {
-            phone = phone.replace("-", "");
-        } else if ("false".equalsIgnoreCase(global) && phone.contains("-")) {
+        if(phone.startsWith("86-")){
             phone = phone.substring(phone.indexOf("-") + 1, phone.length());
-        } else {
+        }else if (phone.contains("-")) {
             phone = phone.replace("-", "");
         }
         aliyun.send(phone, templateCode, param);
