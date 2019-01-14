@@ -104,7 +104,7 @@ public class SmsSender extends BaseController{
             String resultCode = smsService.delPhoneCode(phone);
             JSONObject reservationCode = new JSONObject();
             reservationCode.put("code", resultCode);
-            smsService.sendMessage("三国志M", phone, "SMS_155275048", reservationCode);
+            smsService.sendMessage("三国计中计", phone, "SMS_155275048", reservationCode);
             ResultBean resultBean =  new ResultBean("1000", "登记成功");
             resultBean.setData(resultCode);
             return resultBean;
