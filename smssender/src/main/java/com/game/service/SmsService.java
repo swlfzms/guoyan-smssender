@@ -119,6 +119,11 @@ public class SmsService {
         return smsManager.findByPhoneAndActivityCode(activityCode, phone);
     }
 
+    public boolean deleteByPhoneAndActivityCode(String activityCode, String phone) {
+        smsManager.delPhoneCode(phone);
+        smsManager.deleteByPhoneAndActivityCode(activityCode,phone);
+        return true;
+    }
     public int getTotal() {
         return smsManager.getTotal();
     }

@@ -79,6 +79,4 @@ public class ReservationController extends BaseController {
         resultBean.setData(list);
         return resultBean;
     }
-
-
 }

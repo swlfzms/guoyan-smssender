@@ -48,6 +48,10 @@ public class SmsManager {
         redisTemplate.expire(key, 5, TimeUnit.MINUTES);
         LOGGER.info("设置缓存 phone: {}, code: {}, key:{}", new Object[]{phone, code, key});
     }
+    public boolean delPhoneCode(String phone) {
+        String key = getPhoneRegisterKey(phone);
+        return redisTemplate.delete(phone);
+    }
 
     private String getPhoneRegisterKey(String phone){
         return "PhoneRegisterKey_" + phone;
@@ -106,6 +110,16 @@ public class SmsManager {
         return "ActivityResult_" + activityCode+"_"+phone;
     }
 
+    public boolean deleteByPhoneAndActivityCode(String activityCode, String phone) {
+        String key = getActivityResult(activityCode, phone);
+        redisTemplate.delete(key);
+        ActivityResult activityResult = activityResultRepository.findByPhoneAndActivityCodeAndDeleted(phone, activityCode, false);
+        if(activityResult != null){
+            activityResult.setDeleted(true);
+            activityResultRepository.saveAndFlush(activityResult);
+        }
+        return true;
+    }
     public ActivityResult findByPhoneAndActivityCode(String activityCode, String phone) {
         String key = getActivityResult(activityCode, phone);
         String value = redisTemplate.opsForValue().get(key);

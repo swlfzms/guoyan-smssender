@@ -2,11 +2,8 @@ package com.game.controller;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.game.Application;
 import com.game.beans.ResultBean;
-import com.game.entity.ActivityRegister;
 import com.game.entity.ActivityResult;
-import com.game.repository.ActivityRegisterRepository;
 import com.game.service.SmsService;
 import com.game.util.PhoneFormatUtils;
 import com.game.util.RandomUtils;
@@ -20,8 +17,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Date;
 
 /**
  *  短信发送类
@@ -84,6 +79,53 @@ public class SmsSender extends BaseController{
         }
         smsService.incrementFrequencyAccess(ip);
         return new ResultBean("1000", "短信发送成功");
+    }
+
+    /**
+     * 发送短信
+     * @param params
+     * @return
+     */
+    @RequestMapping("sendMessage1")
+    public @ResponseBody ResultBean sendMessage1(@RequestBody JSONObject params){
+        LOGGER.info("params "+ params);
+        String value = params.getString("value");
+        if(StringUtils.isAnyBlank(value)){
+            return new ResultBean("1002", "参数不能为空");
+        }
+//        boolean isSupport = PhoneFormatUtils.isSupport(value);
+//        if(!isSupport){
+//            return new ResultBean("1001", "手机号格式不对");
+//        }
+        Boolean isTurnOn = env.getProperty("activity.turn.on", Boolean.class);
+        if(!isTurnOn){
+            return new ResultBean("1005", "活动结束了");
+        }
+//        //检查频率
+//        String ip = WebUtils.getIP(request);
+//        LOGGER.info("ip: {}", ip);//223.73.196.38
+//        boolean frequency = smsService.isFrequencyAccess(ip);
+//        if(frequency){
+//            return new ResultBean("1004", "访问太频繁");
+//        }
+        String activityCode = env.getProperty("activity.code", "c8pnadsghyov");
+
+        ActivityResult activityResult = this.smsService.findByPhoneAndActivityCode(activityCode, value);
+        if(activityResult != null){
+            return new ResultBean("1000", activityResult.getActivityCode());
+        }
+        String code = this.smsService.delPhoneCode(value);
+//        String code = RandomUtils.getRandomString(6, RandomUtils.CharacterType.DIGIT);
+//        LOGGER.info("phone: {} 验证码获取成功:{}", new Object[]{phone, code});
+//        synchronized (smsService){
+//            smsService.setPhoneCode(phone, code);
+//            JSONObject content = new JSONObject();
+//            content.put("code", code);
+//            smsService.sendMessage(phone, "SMS_155275146", content);
+//        }
+//        smsService.incrementFrequencyAccess(ip);
+
+        return new ResultBean("1000", code);
     }
 
     @RequestMapping("verifyCode")
@@ -151,6 +193,16 @@ public class SmsSender extends BaseController{
         }else{
             resultBean = new ResultBean("1001", "未预约");
         }
+        return resultBean;
+    }
+
+    @RequestMapping("deleteRecord")
+    public @ResponseBody
+    ResultBean deleteRecord(@RequestBody JSONObject request) {
+        ResultBean resultBean = new ResultBean("1000", "删除成功");
+        String phone = request.getString("phone");
+        String activityCode = env.getProperty("activity.code", "c8pnadsghyov");
+        this.smsService.deleteByPhoneAndActivityCode(activityCode, phone);
         return resultBean;
     }
 }
