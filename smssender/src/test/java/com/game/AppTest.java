@@ -16,7 +16,7 @@ import java.io.IOException;
  */
 public class AppTest 
 {
-    String url = "http://localhost:17289/reservation/insertCode";
+    String url = "http://ec2-18-191-123-41.us-east-2.compute.amazonaws.com:17289/reservation/insertCode";
     /**
      * Rigorous Test :-)
      */
@@ -26,9 +26,9 @@ public class AppTest
         assertTrue( true );
     }
 
-    //@Test
+    @Test
     public void insertCode() throws IOException {
-        BufferedReader br = new BufferedReader(new FileReader("E://code.txt"));
+        BufferedReader br = new BufferedReader(new FileReader("/Users/jason/Desktop/1552060005812.txt"));
         String line = new String();
         JSONArray data = new JSONArray();
         while((line = br.readLine())!= null){
@@ -41,7 +41,7 @@ public class AppTest
         String result = HttpClientUtils.post(url, param.toString());
         System.out.println(result);
     }
-    @Test
+    //@Test
     public void findAll() throws IOException {
         String findAll = "http://localhost:17289/reservation/findValidCode";
         String result = HttpClientUtils.post(findAll, new JSONObject().toString());
